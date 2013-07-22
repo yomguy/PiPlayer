@@ -22,7 +22,6 @@
 # Boston, MA 02111-1307, USA.
 
 
-
 import gobject
 gobject.threads_init()
 import pygst
@@ -61,7 +60,7 @@ class AudioPlayer(Thread):
         
         # The controller
         self.controller = OSCController(12345)
-        self.controller.add_method('/play', 'i', self.play_stop_cb)
+        self.controller.add_method('/play', 'i', self.play_stop)
         self.controller.start()
  
         # The pipeline
@@ -99,7 +98,6 @@ class AudioPlayer(Thread):
         # The MainLoop
         self.mainloop = gobject.MainLoop()
  
- 
     def on_pad_added(self, element, pad):
         caps = pad.get_caps()
         name = caps[0].get_name()
@@ -124,14 +122,18 @@ class AudioPlayer(Thread):
         print 'on_error:', error[1]
         self.mainloop.quit()
  
-    def play_stop_cb(self, path, value):
+    def play_stop(self, path, value):
         value = value[0]
         if value:
             self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
         else:
             self.pipeline.set_state(gst.STATE_NULL)
-            
+    
+    def update_uri(uri):
+        self.uri = uri
+        self.srcdec.set_property('uri', self.uri)
+        
     def run(self):
         self.mainloop.run()
 
