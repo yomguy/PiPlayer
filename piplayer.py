@@ -151,6 +151,7 @@ class AudioPlayer(object):
     def osc_play_stop(self, path, value):
         value = value[0]
         if value:
+            #print 'play'
             self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
         else:
@@ -158,7 +159,7 @@ class AudioPlayer(object):
 
     def gpio_play(self, value):
         if not self.play:
-            print 'play'
+            #print 'play'
             self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.play = True
