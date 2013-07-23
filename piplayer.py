@@ -55,18 +55,18 @@ class GPIOController(Thread):
 
     def __init__(self, channel):
         Thread.__init__(self)
-        self.gpio_channel = channel
-    
-    def add_callback(self, callback):
         import RPi.GPIO as GPIO
+        self.server = GPIO
+        self.gpio_channel = channel
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.gpio_channel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(self.gpio_channel, GPIO.PUD_UP, callback=callback)
+        GPIO.setup(self.gpio_channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        
+    def add_callback(self, callback):
+        GPIO.add_event_detect(self.gpio_channel, GPIO.PUD_DOWN, callback=callback, bouncetime=100)
         
     def run(self):
-        while True:
-            time.sleep(0.1)
-    
+        pass
+            
             
 class AudioPlayer(object):
     
