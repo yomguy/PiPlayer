@@ -71,6 +71,7 @@ class AudioPlayer(object):
     
     osc_port = 12345
     gpio_channel_play = 22
+    gpio_channel_stop = 23
     playing = False
     
     def __init__(self, uri):    
@@ -79,11 +80,13 @@ class AudioPlayer(object):
         # OSC controller
         self.osc_controller = OSCController(self.osc_port)
         self.osc_controller.add_method('/play', 'i', self.osc_play_stop)
+        self.osc_controller.add_method('/stop', 'i', self.osc_play_stop)
         self.osc_controller.start()
  
         # GPIO controller
         self.gpio_controller = GPIOController()
         self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play)
+        self.gpio_controller.add_channel_callback(self.gpio_channel_stop, self.gpio_stop)
         self.gpio_controller.start()
         
         # The pipeline
@@ -146,27 +149,30 @@ class AudioPlayer(object):
         print 'on_error:', error[1]
         self.mainloop.quit()
  
-    def osc_play_stop(self, path, value):
-        value = value[0]
-        if value and not self.playing:
-            #print 'play'
+    def play(self):
+        if not self.playing:
             self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.playing = True
-        else:
+    
+    def stop(self):
+        if self.playing:
             self.pipeline.set_state(gst.STATE_NULL)
             self.playing = False
 
-    def gpio_play(self, value):
-        if not self.playing:
-            #print 'play'
-            self.pipeline.set_state(gst.STATE_NULL)
-            self.pipeline.set_state(gst.STATE_PLAYING)
-            self.playing = True
+    def osc_play_stop(self, path, value):
+        value = value[0]
+        if value and not self.playing:
+            self.play()
         else:
-            self.pipeline.set_state(gst.STATE_NULL)
-            self.playing = False
-        
+            self.stop()
+            
+    def gpio_play(self, channel):
+        self.play()
+
+    def gpio_stop(self, channel):
+        self.stop()
+            
     def update_uri(uri):
         self.uri = uri
         self.srcdec.set_property('uri', self.uri)
