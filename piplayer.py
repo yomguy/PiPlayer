@@ -133,10 +133,7 @@ class AudioPlayer(object):
                 pad.link(self.apad)
  
     def on_eos(self, bus, msg):
-        #print 'on_eos'
-        self.pipeline.set_state(gst.STATE_NULL)
-        self.playing = False
-        #self.mainloop.quit()
+        self.stop()
  
     def on_tag(self, bus, msg):
         taglist = msg.parse_tag()
@@ -151,7 +148,6 @@ class AudioPlayer(object):
  
     def play(self):
         if not self.playing:
-            self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.playing = True
     
@@ -180,6 +176,9 @@ class AudioPlayer(object):
     def run(self):
         self.mainloop.run()
 
+    def quit(self):
+        self.mainloop.quit()
+        
         
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
