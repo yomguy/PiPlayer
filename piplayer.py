@@ -81,7 +81,7 @@ class AudioPlayer(object):
         self.osc_controller.add_method('/play', 'i', self.osc_play_stop)
         self.osc_controller.start()
  
-        # GPIO Controller
+        # GPIO controller
         self.gpio_controller = GPIOController()
         self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play)
         self.gpio_controller.start()
@@ -172,9 +172,9 @@ class AudioPlayer(object):
         
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
-        print """ piplayer.py : a RPi gstreamer base media sample player trigerred by GPIO or OSC 
-  usage : python piplayer.py URI
-  example : python piplayer.py file:///path/to/a/media/file
+        print """ piplayer.py : a RPi gstreamer based media sample player trigerred by GPIO or OSC callbacks 
+  usage : sudo python piplayer.py URI
+  example : sudo python piplayer.py file:///path/to/a/media/file
     OSC : 
       default port : 12345
       default play address : /play/1
