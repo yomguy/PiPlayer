@@ -61,7 +61,7 @@ class GPIOController(Thread):
         
     def add_channel_callback(self, channel, callback):
         self.server.setup(channel, self.server.IN, pull_up_down=self.method)
-        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=100)
+        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=1000)
         
     def run(self):
         pass
@@ -148,12 +148,14 @@ class AudioPlayer(object):
  
     def osc_play_stop(self, path, value):
         value = value[0]
-        if value:
+        if value and not self.playing:
             #print 'play'
             self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
+            self.playing = True
         else:
             self.pipeline.set_state(gst.STATE_NULL)
+            self.playing = False
 
     def gpio_play(self, value):
         if not self.playing:
@@ -161,6 +163,9 @@ class AudioPlayer(object):
             self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.playing = True
+        else:
+            self.pipeline.set_state(gst.STATE_NULL)
+            self.playing = False
         
     def update_uri(uri):
         self.uri = uri
