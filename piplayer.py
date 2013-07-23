@@ -54,10 +54,9 @@ class OSCController(Thread):
             self.server.recv(100)
 
             
-class AudioPlayer(Thread):
+class AudioPlayer(object):
     
     def __init__(self, uri):
-        Thread.__init__(self)
         
         self.uri = uri
         
@@ -67,9 +66,10 @@ class AudioPlayer(Thread):
         self.osc_controller.start()
  
         # GPIO Controller
-        self.gpio_channel = 0
-        GPIO.setup(self.gpio_channel, GPIO.IN)
-        GPIO.add_event_detect(self.gpio_channel, GPIO.LOW, callback=self.gpio_play)
+        self.gpio_channel = 22
+        #GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.gpio_channel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(self.gpio_channel, GPIO.PUD_UP, callback=self.gpio_play)
         
         # The pipeline
         self.pipeline = gst.Pipeline()
@@ -138,7 +138,8 @@ class AudioPlayer(Thread):
         else:
             self.pipeline.set_state(gst.STATE_NULL)
 
-    def gpio_play(self):
+    def gpio_play(self, value):
+        print 'play'
         self.pipeline.set_state(gst.STATE_NULL)
         self.pipeline.set_state(gst.STATE_PLAYING)
         
@@ -153,5 +154,5 @@ class AudioPlayer(Thread):
 if __name__ == '__main__':
     uri = sys.argv[-1]
     player = AudioPlayer(uri)
-    player.start()
+    player.run()
     
