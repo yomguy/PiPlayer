@@ -56,13 +56,13 @@ class GPIOController(Thread):
     def __init__(self, channel):
         Thread.__init__(self)
         import RPi.GPIO as GPIO
-        self.gpio_channel = channel
+        self.channel = channel
         self.server = GPIO
         self.server.setmode(self.server.BCM)
-        self.server.setup(self.gpio_channel, self.server.IN, pull_up_down=self.server.PUD_DOWN)
+        self.server.setup(self.channel, self.server.IN, pull_up_down=self.server.PUD_DOWN)
         
     def add_callback(self, callback):
-        self.server.add_event_detect(self.gpio_channel, self.server.PUD_DOWN, callback=callback, bouncetime=100)
+        self.server.add_event_detect(self.channel, self.server.PUD_DOWN, callback=callback, bouncetime=100)
         
     def run(self):
         pass
@@ -70,18 +70,19 @@ class GPIOController(Thread):
             
 class AudioPlayer(object):
     
-    def __init__(self, uri):
-
-        
+    osc_channel = 12345
+    gpio_channel = 22
+    
+    def __init__(self, uri):    
         self.uri = uri
         
         # OSC controller
-        self.osc_controller = OSCController(12345)
+        self.osc_controller = OSCController(self.osc_channel)
         self.osc_controller.add_method('/play', 'i', self.osc_play_stop)
         self.osc_controller.start()
  
         # GPIO Controller
-        self.gpio_controller = GPIOController(22)
+        self.gpio_controller = GPIOController(self.gpio_channel)
         self.gpio_controller.add_callback(self.gpio_play)
         self.gpio_controller.start()
         #GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
