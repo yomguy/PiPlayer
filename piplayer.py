@@ -53,16 +53,16 @@ class OSCController(Thread):
             
 class GPIOController(Thread):
 
-    def __init__(self, channel):
+    def __init__(self):
         Thread.__init__(self)
         import RPi.GPIO as GPIO
-        self.channel = channel
         self.server = GPIO
         self.server.setmode(self.server.BCM)
-        self.server.setup(self.channel, self.server.IN, pull_up_down=self.server.PUD_DOWN)
+        self.method = self.server.PUD_DOWN
         
-    def add_callback(self, callback):
-        self.server.add_event_detect(self.channel, self.server.PUD_DOWN, callback=callback, bouncetime=100)
+    def add_channel_callback(self, channel, callback):
+        self.server.setup(channel, self.server.IN, pull_up_down=self.method)
+        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=100)
         
     def run(self):
         pass
@@ -70,21 +70,21 @@ class GPIOController(Thread):
             
 class AudioPlayer(object):
     
-    osc_channel = 12345
-    gpio_channel = 22
-    play = False
+    osc_port = 12345
+    gpio_channel_play = 22
+    playing = False
     
     def __init__(self, uri):    
         self.uri = uri
         
         # OSC controller
-        self.osc_controller = OSCController(self.osc_channel)
+        self.osc_controller = OSCController(self.osc_port)
         self.osc_controller.add_method('/play', 'i', self.osc_play_stop)
         self.osc_controller.start()
  
         # GPIO Controller
-        self.gpio_controller = GPIOController(self.gpio_channel)
-        self.gpio_controller.add_callback(self.gpio_play)
+        self.gpio_controller = GPIOController()
+        self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play)
         self.gpio_controller.start()
         #GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         
@@ -134,7 +134,7 @@ class AudioPlayer(object):
     def on_eos(self, bus, msg):
         #print 'on_eos'
         self.pipeline.set_state(gst.STATE_NULL)
-        self.play = False
+        self.playing = False
         #self.mainloop.quit()
  
     def on_tag(self, bus, msg):
@@ -158,11 +158,11 @@ class AudioPlayer(object):
             self.pipeline.set_state(gst.STATE_NULL)
 
     def gpio_play(self, value):
-        if not self.play:
+        if not self.playing:
             #print 'play'
             self.pipeline.set_state(gst.STATE_NULL)
             self.pipeline.set_state(gst.STATE_PLAYING)
-            self.play = True
+            self.playing = True
         
     def update_uri(uri):
         self.uri = uri
