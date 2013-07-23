@@ -28,11 +28,8 @@ import pygst
 pygst.require("0.10")
 import gst
 from threading import Thread
-import sys
-import liblo
+import sys, time
 
-import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
 
 
 class OSCController(Thread):
@@ -54,9 +51,27 @@ class OSCController(Thread):
             self.server.recv(100)
 
             
+class GPIOController(Thread):
+
+    def __init__(self, channel):
+        Thread.__init__(self)
+        self.gpio_channel = channel
+    
+    def add_callback(self, callback):
+        import RPi.GPIO as GPIO
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.gpio_channel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(self.gpio_channel, GPIO.PUD_UP, callback=callback)
+        
+    def run(self):
+        while True:
+            time.sleep(0.1)
+    
+            
 class AudioPlayer(object):
     
     def __init__(self, uri):
+
         
         self.uri = uri
         
@@ -66,10 +81,10 @@ class AudioPlayer(object):
         self.osc_controller.start()
  
         # GPIO Controller
-        self.gpio_channel = 22
+        self.gpio_controller = GPIOController(22)
+        self.gpio_controller.add_callback(self.gpio_play)
+        self.gpio_controller.start()
         #GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(self.gpio_channel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(self.gpio_channel, GPIO.PUD_UP, callback=self.gpio_play)
         
         # The pipeline
         self.pipeline = gst.Pipeline()
