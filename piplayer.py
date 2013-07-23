@@ -72,6 +72,7 @@ class AudioPlayer(object):
     
     osc_channel = 12345
     gpio_channel = 22
+    play = False
     
     def __init__(self, uri):    
         self.uri = uri
@@ -133,6 +134,7 @@ class AudioPlayer(object):
     def on_eos(self, bus, msg):
         #print 'on_eos'
         self.pipeline.set_state(gst.STATE_NULL)
+        self.play = False
         #self.mainloop.quit()
  
     def on_tag(self, bus, msg):
@@ -155,9 +157,11 @@ class AudioPlayer(object):
             self.pipeline.set_state(gst.STATE_NULL)
 
     def gpio_play(self, value):
-        print 'play'
-        self.pipeline.set_state(gst.STATE_NULL)
-        self.pipeline.set_state(gst.STATE_PLAYING)
+        if not self.play:
+            print 'play'
+            self.pipeline.set_state(gst.STATE_NULL)
+            self.pipeline.set_state(gst.STATE_PLAYING)
+            self.play = True
         
     def update_uri(uri):
         self.uri = uri
