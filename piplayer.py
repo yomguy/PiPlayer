@@ -71,7 +71,7 @@ class AudioPlayer(object):
     
     osc_port = 12345
     gpio_channel_play = 22
-    gpio_channel_stop = 23
+    gpio_channel_stop = 24
     playing = False
     
     def __init__(self, uri):    
