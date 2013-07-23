@@ -31,7 +31,6 @@ from threading import Thread
 import sys, time
 
 
-
 class OSCController(Thread):
 
     def __init__(self, port):
@@ -86,7 +85,6 @@ class AudioPlayer(object):
         self.gpio_controller = GPIOController()
         self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play)
         self.gpio_controller.start()
-        #GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         
         # The pipeline
         self.pipeline = gst.Pipeline()
@@ -173,7 +171,19 @@ class AudioPlayer(object):
 
         
 if __name__ == '__main__':
-    uri = sys.argv[-1]
-    player = AudioPlayer(uri)
-    player.run()
+    if len(sys.argv) <= 1:
+        print """ piplayer.py : a RPi gstreamer base media sample player trigerred by GPIO or OSC 
+  usage : python piplayer.py URI
+  example : python piplayer.py file:///path/to/a/media/file
+    OSC : 
+      default port : 12345
+      default play address : /play/1
+    GPIO :
+      default channel : 22
+      default method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 15 (GPIO 22)  
+"""
+    else:
+        uri = sys.argv[-1]
+        player = AudioPlayer(uri)
+        player.run()
     
