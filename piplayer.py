@@ -28,7 +28,13 @@ import pygst
 pygst.require("0.10")
 import gst
 from threading import Thread
-import sys, time
+import os, sys, time
+import urlparse, urllib
+
+
+def path2url(path):
+    return urlparse.urljoin(
+      'file:', urllib.pathname2url(path))
 
 
 class OSCController(Thread):
@@ -73,10 +79,14 @@ class AudioPlayer(object):
     gpio_channel_play = 22
     gpio_channel_stop = 24
     playing = False
-    alsa_device = 'hw:1'
- 
-    def __init__(self, uri):    
-        self.uri = uri
+    alsa_device = 'hw:0'
+    
+    def __init__(self, play_dir):    
+        self.play_dir = play_dir
+        self. playlist = []
+        for files, dirs, root in os.walk(self.play_dir)
+            for filename in files:
+                self.playlist.append(path2url(root + os.sep + filename))
         
         # OSC controller
         self.osc_controller = OSCController(self.osc_port)
@@ -141,8 +151,7 @@ class AudioPlayer(object):
                 pad.link(self.apad)
  
     def on_eos(self, bus, msg):
-        self.stop()
-        #self.play()
+        self.next()
  
     def on_tag(self, bus, msg):
         taglist = msg.parse_tag()
@@ -154,8 +163,15 @@ class AudioPlayer(object):
         error = msg.parse_error()
         print 'on_error:', error[1]
         self.mainloop.quit()
- 
+    
+    def next(self):
+        self.play_id += 1
+        if self.play_id >= len(self.playlist):
+            self.play_id = 0
+        self.set_uri(self.playlist[self.play_id])
+        
     def play(self):
+        self.play_id = 0
         if not self.playing:
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.playing = True
@@ -178,7 +194,7 @@ class AudioPlayer(object):
     def gpio_stop(self, channel):
         self.stop()
             
-    def update_uri(uri):
+    def set_uri(uri):
         self.uri = uri
         self.srcdec.set_property('uri', self.uri)
         
@@ -192,8 +208,8 @@ class AudioPlayer(object):
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
         print """ piplayer.py : a RPi gstreamer based media sample player trigerred by GPIO or OSC callbacks 
-  usage : sudo python piplayer.py URI
-  example : sudo python piplayer.py file:///path/to/a/media/file
+  usage : sudo python piplayer.py DIR
+  example : sudo python piplayer.py /path/to/dir/
     OSC : 
       port : 12345
       play address : /play/1
@@ -204,7 +220,7 @@ if __name__ == '__main__':
       stop method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 18 (GPIO 24)  
 """
     else:
-        uri = sys.argv[-1]
-        player = AudioPlayer(uri)
+        path = sys.argv[-1]
+        player = AudioPlayer(path)
         player.run()
     
