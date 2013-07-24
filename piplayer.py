@@ -73,7 +73,8 @@ class AudioPlayer(object):
     gpio_channel_play = 22
     gpio_channel_stop = 24
     playing = False
-    
+    alsa_device = 'hw:1'
+ 
     def __init__(self, uri):    
         self.uri = uri
         
@@ -111,6 +112,13 @@ class AudioPlayer(object):
         # Connect handler for 'pad-added' signal
         self.srcdec.connect('pad-added', self.on_pad_added)
  
+        # Eq
+        #self.eq = gst.element_factory_make('equalizer-10bands')
+        #self.eq.set_property('band0', -24.0)
+ 
+        # ALSA
+        self.sink.set_property('device', self.alsa_device)
+       
         # Add elements to pipeline
         self.pipeline.add(self.srcdec, self.conv, self.rsmpl, self.sink)
  
@@ -134,6 +142,7 @@ class AudioPlayer(object):
  
     def on_eos(self, bus, msg):
         self.stop()
+        #self.play()
  
     def on_tag(self, bus, msg):
         taglist = msg.parse_tag()
@@ -186,11 +195,13 @@ if __name__ == '__main__':
   usage : sudo python piplayer.py URI
   example : sudo python piplayer.py file:///path/to/a/media/file
     OSC : 
-      default port : 12345
-      default play address : /play/1
+      port : 12345
+      play address : /play/1
     GPIO :
-      default channel : 22
-      default method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 15 (GPIO 22)  
+      play channel : 22
+      play method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 15 (GPIO 22)
+      stop channel : 24
+      stop method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 18 (GPIO 24)  
 """
     else:
         uri = sys.argv[-1]
