@@ -84,9 +84,10 @@ class AudioPlayer(object):
     def __init__(self, play_dir):    
         self.play_dir = play_dir
         self. playlist = []
-        for files, dirs, root in os.walk(self.play_dir)
+        for root, dirs, files in os.walk(self.play_dir):
             for filename in files:
-                self.playlist.append(path2url(root + os.sep + filename))
+                path = root + os.sep + filename
+                self.playlist.append(path2url(path))
         
         # OSC controller
         self.osc_controller = OSCController(self.osc_port)
@@ -117,6 +118,9 @@ class AudioPlayer(object):
         self.sink = gst.element_factory_make('alsasink')
  
         # Set 'uri' property on uridecodebin
+        #self.srcdec.set_property('uri', 'file:///fake')
+        self.play_id = 0
+        self.uri =  self.playlist[self.play_id]
         self.srcdec.set_property('uri', self.uri)
  
         # Connect handler for 'pad-added' signal
@@ -138,7 +142,7 @@ class AudioPlayer(object):
  
         # Reference used in self.on_new_decoded_pad()
         self.apad = self.conv.get_pad('sink')
- 
+
         # The MainLoop
         self.mainloop = gobject.MainLoop()
  
@@ -165,16 +169,22 @@ class AudioPlayer(object):
         self.mainloop.quit()
     
     def next(self):
+        self.pipeline.set_state(gst.STATE_NULL)
         self.play_id += 1
-        if self.play_id >= len(self.playlist):
-            self.play_id = 0
-        self.set_uri(self.playlist[self.play_id])
+        if self.play_id > len(self.playlist)+1:
+            self.play_id = 0    
+        self.uri =  self.playlist[self.play_id]
+        self.srcdec.set_property('uri', self.uri)
+        self.pipeline.set_state(gst.STATE_PLAYING)
+        print self.play_id
         
     def play(self):
-        self.play_id = 0
         if not self.playing:
+            #self.play_id = 0
+            #self.next()
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.playing = True
+            print self.uri
     
     def stop(self):
         if self.playing:
@@ -194,10 +204,6 @@ class AudioPlayer(object):
     def gpio_stop(self, channel):
         self.stop()
             
-    def set_uri(uri):
-        self.uri = uri
-        self.srcdec.set_property('uri', self.uri)
-        
     def run(self):
         self.mainloop.run()
 
