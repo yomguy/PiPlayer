@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-import os
 
 
 CLASSIFIERS = [
@@ -35,6 +34,3 @@ setup(
   zip_safe = False,
   scripts = ['scripts/piplayer'],
 )
-
-os.system('cp -ra etc/* /etc/')
-os.system('update-rc.d piplayer defaults 5 1')

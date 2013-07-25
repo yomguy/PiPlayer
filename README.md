@@ -33,7 +33,14 @@ GPIO
  * stop channel : 24
  * stop method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 18 (GPIO 24)
 
+INSTALL
+--------
+
+ $ sudp python setup.py install 
+
+
 DAEMON
 -------
 
-See etc/
+ $ cp -ra etc/* /etc/
+ $ update-rc.d piplayer defaults 5 1
