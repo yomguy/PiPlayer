@@ -23,7 +23,7 @@ setup(
   version = '0.2',
   install_requires = [
         'setuptools',
-        'liblo',
+        'pyliblo',
         'RPi.GPIO',
         ],
   platforms=['OS Independent'],
