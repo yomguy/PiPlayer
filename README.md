@@ -9,14 +9,14 @@ Usage
 ------
 
 ```
-  sudo piplayer DIR
+  $ sudo piplayer DIR
 ```
 
 Example
 ------------
 
 ```
-  sudo piplayer /path/to/dir/
+  $ sudo piplayer /path/to/dir/
 ```
 
 OSC
