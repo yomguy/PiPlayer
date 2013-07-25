@@ -1,0 +1,4 @@
+
+START_DAEMON="yes"
+
+PLAYLIST_DIR="/home/pi/music"
