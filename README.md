@@ -37,7 +37,7 @@ INSTALL
 --------
 
 ```
- $ sudp python setup.py install 
+ $ sudo python setup.py install 
 ```
 
 DAEMON
