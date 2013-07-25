@@ -28,8 +28,8 @@ from piplayer.player import PiPlayer
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
         print """ piplayer : a gstreamer based media sample player for the Raspberry Pi trigerred by GPIO or OSC callbacks 
-  usage : sudo python piplayer.py DIR
-  example : sudo python piplayer.py /path/to/dir/
+  usage : sudo piplayer DIR
+  example : sudo piplayer /path/to/dir/
     OSC : 
       port : 12345
       play address : /play/1
