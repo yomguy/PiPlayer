@@ -37,6 +37,11 @@ INSTALL
 --------
 
 ```
+ $ sudo apt-get install python python-pip python-setuptools python-gobject \
+                        python-gst0.10 gstreamer0.10-plugins-base gir1.2-gstreamer-0.10 \
+                        gstreamer0.10-plugins-good gstreamer0.10-plugins-bad \
+                        gstreamer0.10-plugins-ugly gobject-introspection python-liblo
+
  $ sudo python setup.py install 
 ```
 
