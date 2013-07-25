@@ -14,6 +14,7 @@ Usage
 
 Example
 ------------
+
 ```
   sudo piplayer /path/to/dir/
 ```
@@ -21,16 +22,16 @@ Example
 OSC
 ----
 
-     * port : 12345
-     * play address : /play/1
+ * port : 12345
+ * play address : /play/1
  
 GPIO
 -----
 
-     * play channel : 22
-     * play method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 15 (GPIO 22)
-     * stop channel : 24
-     * stop method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 18 (GPIO 24)
+ * play channel : 22
+ * play method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 15 (GPIO 22)
+ * stop channel : 24
+ * stop method : PUD_DOWN between PIN 1 (3.3V Power) and PIN 18 (GPIO 24)
 
 DAEMON
 -------
