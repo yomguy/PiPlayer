@@ -68,9 +68,9 @@ class GPIOController(Thread):
         self.server.setmode(self.server.BCM)
         self.method = self.server.PUD_DOWN
         
-    def add_channel_callback(self, channel, callback):
+    def add_channel_callback(self, channel, callback, bouncetime):
         self.server.setup(channel, self.server.IN, pull_up_down=self.method)
-        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=3000)
+        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=bouncetime)
         
     def run(self):
         pass
@@ -84,10 +84,10 @@ class PiPlayer(object):
     playing = False
     looping = False
     auto_next = False
-    alsa_device = 'hw:1'
+    alsa_device = 'hw:0'
     
-    
-    def __init__(self, play_dir):    
+    def __init__(self, play_dir):
+        # Playlist
         self.play_dir = play_dir
         self. playlist = []
         self.set_playlist()
@@ -100,8 +100,8 @@ class PiPlayer(object):
  
         # GPIO controller
         self.gpio_controller = GPIOController()
-        self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play)
-        self.gpio_controller.add_channel_callback(self.gpio_channel_stop, self.gpio_stop)
+        self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play, 3000)
+        self.gpio_controller.add_channel_callback(self.gpio_channel_stop, self.gpio_stop, 1000)
         self.gpio_controller.start()
         
         # The pipeline
