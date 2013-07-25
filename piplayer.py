@@ -21,6 +21,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+__version__ = '0.2'
 
 import gobject
 gobject.threads_init()
@@ -30,6 +31,8 @@ import gst
 from threading import Thread
 import os, sys, time
 import urlparse, urllib
+
+DEBUG = False
 
 
 def path2url(path):
@@ -67,24 +70,20 @@ class GPIOController(Thread):
         
     def add_channel_callback(self, channel, callback):
         self.server.setup(channel, self.server.IN, pull_up_down=self.method)
-        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=1000)
+        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=3000)
         
     def run(self):
         pass
-
-
-class Playlist(object):
-    
-    playlist = []
     
             
-class AudioPlayer(object):
+class PiPlayer(object):
     
     osc_port = 12345
     gpio_channel_play = 22
     gpio_channel_stop = 24
     playing = False
-    looping = True
+    looping = False
+    auto_next = False
     alsa_device = 'hw:1'
     
     
@@ -92,7 +91,6 @@ class AudioPlayer(object):
         self.play_dir = play_dir
         self. playlist = []
         self.set_playlist()
-        print self.playlist
         
         # OSC controller
         self.osc_controller = OSCController(self.osc_port)
@@ -151,7 +149,8 @@ class AudioPlayer(object):
         # The MainLoop
         self.mainloop = gobject.MainLoop()
         
-        self.play()
+        if self.playing:
+            self.play()
  
     def on_pad_added(self, element, pad):
         caps = pad.get_caps()
@@ -162,7 +161,10 @@ class AudioPlayer(object):
                 pad.link(self.apad)
  
     def on_eos(self, bus, msg):
-        self.next()
+        if self.auto_next:
+            self.next()
+        else:
+            self.stop()
  
     def on_tag(self, bus, msg):
         taglist = msg.parse_tag()
@@ -180,25 +182,24 @@ class AudioPlayer(object):
             for filename in files:
                 path = root + os.sep + filename
                 self.playlist.append(path2url(path))
+        self.playlist.sort()
                 
     def next(self):
         self.play_id += 1
         if self.play_id >= len(self.playlist):
-            self.play_id = 0    
+            self.play_id = 0
         self.uri =  self.playlist[self.play_id]
         self.pipeline.set_state(gst.STATE_NULL)
         self.srcdec.set_property('uri', self.uri)
         self.pipeline.set_state(gst.STATE_PLAYING)
-        print self.play_id
+        if DEBUG:
+            print self.play_id, self.uri
         
     def play(self):
         if not self.playing:
-            #self.play_id = 0
-            #self.next()
-            print self.uri
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.playing = True
-        else:
+        elif self.auto_next:
             self.next()
     
     def stop(self):
@@ -242,6 +243,6 @@ if __name__ == '__main__':
 """
     else:
         path = sys.argv[-1]
-        player = AudioPlayer(path)
+        player = PiPlayer(path)
         player.run()
     
