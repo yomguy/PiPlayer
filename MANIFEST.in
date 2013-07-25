@@ -1,0 +1,11 @@
+include LICENSE
+include README.md
+include requirements.txt
+
+recursive-include etc *
+recursive-include tests *
+
+recursive-exclude * *.pyc
+recursive-exclude * *.swp
+recursive-exclude dist *
+recursive-exclude build *

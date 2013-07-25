@@ -14,7 +14,7 @@ CONF=/etc/default/piplayer
 LOG=/var/log/piplayer.log
 PIDFILE=/var/run/piplayer.pid
 NAME=$DAEMON
-DESC="Rpi piplayer"
+DESC="RPi piplayer"
 
 test -f $CONF || exit 0
 . $CONF
