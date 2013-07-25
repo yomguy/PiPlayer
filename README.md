@@ -36,11 +36,14 @@ GPIO
 INSTALL
 --------
 
+```
  $ sudp python setup.py install 
-
+```
 
 DAEMON
 -------
 
+```
  $ cp -ra etc/* /etc/
  $ update-rc.d piplayer defaults 5 1
+```
