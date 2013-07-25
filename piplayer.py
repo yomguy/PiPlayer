@@ -71,7 +71,12 @@ class GPIOController(Thread):
         
     def run(self):
         pass
-            
+
+
+class Playlist(object):
+    
+    playlist = []
+    
             
 class AudioPlayer(object):
     
@@ -79,15 +84,15 @@ class AudioPlayer(object):
     gpio_channel_play = 22
     gpio_channel_stop = 24
     playing = False
-    alsa_device = 'hw:0'
+    looping = True
+    alsa_device = 'hw:1'
+    
     
     def __init__(self, play_dir):    
         self.play_dir = play_dir
         self. playlist = []
-        for root, dirs, files in os.walk(self.play_dir):
-            for filename in files:
-                path = root + os.sep + filename
-                self.playlist.append(path2url(path))
+        self.set_playlist()
+        print self.playlist
         
         # OSC controller
         self.osc_controller = OSCController(self.osc_port)
@@ -145,6 +150,8 @@ class AudioPlayer(object):
 
         # The MainLoop
         self.mainloop = gobject.MainLoop()
+        
+        self.play()
  
     def on_pad_added(self, element, pad):
         caps = pad.get_caps()
@@ -168,12 +175,18 @@ class AudioPlayer(object):
         print 'on_error:', error[1]
         self.mainloop.quit()
     
+    def set_playlist(self):
+        for root, dirs, files in os.walk(self.play_dir):
+            for filename in files:
+                path = root + os.sep + filename
+                self.playlist.append(path2url(path))
+                
     def next(self):
-        self.pipeline.set_state(gst.STATE_NULL)
         self.play_id += 1
-        if self.play_id > len(self.playlist)+1:
+        if self.play_id >= len(self.playlist):
             self.play_id = 0    
         self.uri =  self.playlist[self.play_id]
+        self.pipeline.set_state(gst.STATE_NULL)
         self.srcdec.set_property('uri', self.uri)
         self.pipeline.set_state(gst.STATE_PLAYING)
         print self.play_id
@@ -182,9 +195,11 @@ class AudioPlayer(object):
         if not self.playing:
             #self.play_id = 0
             #self.next()
+            print self.uri
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.playing = True
-            print self.uri
+        else:
+            self.next()
     
     def stop(self):
         if self.playing:
