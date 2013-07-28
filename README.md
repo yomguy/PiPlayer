@@ -2,7 +2,7 @@
 PiPlayer : audio sample player for the Rpi
 ---------------------------------------------
 
-a gstreamer based media sample player for the Raspberry Pi trigerred by GPIO or OSC callbacks.
+a minimalistic gstreamer based media sample player for the Raspberry Pi trigerred by GPIO or OSC callbacks.
   
 
 Usage
@@ -51,4 +51,23 @@ DAEMON
 ```
  $ cp -ra etc/* /etc/
  $ update-rc.d piplayer defaults 5 1
+```
+
+OPTIONS
+--------
+
+Some properties and options (like "auto next" and "looping") are tunable in the PiPlayer class:
+
+```
+class PiPlayer(object):
+    
+    osc_port = 12345
+    gpio_channel_play = 22
+    gpio_channel_stop = 24
+    playing = False
+    looping = False
+    auto_next = False
+    alsa_device = 'hw:0'
+
+    ...
 ```
