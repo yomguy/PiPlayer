@@ -184,5 +184,5 @@ class PiPlayer(object):
 
     def quit(self):
         self.mainloop.quit()
-        
-        
+
+ 
