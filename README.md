@@ -23,9 +23,9 @@ GPIO
 -----
 
  * play channel : 22
- * play method : PUD_DOWN between PIN 1 (3.3V power) and PIN 15 (GPIO 22)
+ * play method : RISING between PIN 1 (3.3V power) and PIN 15 (GPIO 22)
  * stop channel : 24
- * stop method : PUD_DOWN between PIN 1 (3.3V power) and PIN 18 (GPIO 24)
+ * stop method : RISING between PIN 1 (3.3V power) and PIN 18 (GPIO 24)
 
 INSTALL
 --------
