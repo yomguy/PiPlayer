@@ -46,6 +46,7 @@ class PiPlayer(object):
     looping = False
     auto_next = False
     alsa_device = 'hw:0'
+    parasite_filter_time = 0.02
     
     def __init__(self, play_dir):
         # Playlist
@@ -155,14 +156,20 @@ class PiPlayer(object):
         self.pipeline.set_state(gst.STATE_PLAYING)
         if DEBUG:
             print self.play_id, self.uri
-        
+
+    def parasite_filter(self):
+        import RPi.GPIO as GPIO
+        time.sleep(self.parasite_filter_time)
+        return GPIO.input(self.gpio_channel_play):
+            
     def play(self):
         if not self.playing:
-            self.pipeline.set_state(gst.STATE_PLAYING)
-            self.playing = True
+            if self.parasite_filter():
+                self.pipeline.set_state(gst.STATE_PLAYING)
+                self.playing = True
         elif self.auto_next:
             self.next()
-    
+
     def stop(self):
         if self.playing:
             self.pipeline.set_state(gst.STATE_NULL)
