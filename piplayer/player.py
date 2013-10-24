@@ -32,6 +32,7 @@ import pygst
 pygst.require("0.10")
 import gst
 import os, sys
+import time
 
 from piplayer.tools import *
 from piplayer.controller import *
@@ -46,7 +47,7 @@ class PiPlayer(object):
     looping = False
     auto_next = False
     alsa_device = 'hw:0'
-    parasite_filter_time = 0.02
+    gpio_parasite_filter_time = 0.02
     
     def __init__(self, play_dir):
         # Playlist
@@ -157,16 +158,14 @@ class PiPlayer(object):
         if DEBUG:
             print self.play_id, self.uri
 
-    def parasite_filter(self):
-        import RPi.GPIO as GPIO
-        time.sleep(self.parasite_filter_time)
-        return GPIO.input(self.gpio_channel_play):
+    def gpio_parasite_filter(self):
+        time.sleep(self.gpio_parasite_filter_time)
+        return self.gpio_controller.server.input(self.gpio_channel_play)
             
     def play(self):
-        if not self.playing:
-            if self.parasite_filter():
-                self.pipeline.set_state(gst.STATE_PLAYING)
-                self.playing = True
+        if not self.playing:    
+            self.pipeline.set_state(gst.STATE_PLAYING)
+            self.playing = True
         elif self.auto_next:
             self.next()
 
@@ -183,10 +182,12 @@ class PiPlayer(object):
             self.stop()
             
     def gpio_play(self, channel):
-        self.play()
+        if self.gpio_parasite_filter():
+            self.play()
 
     def gpio_stop(self, channel):
-        self.stop()
+        if self.gpio_parasite_filter():
+            self.stop()
             
     def run(self):
         self.mainloop.run()

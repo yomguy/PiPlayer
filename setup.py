@@ -19,7 +19,7 @@ setup(
   long_description = open('README.md').read(),
   author = "Guillaume Pellerin",
   author_email = "yomguy@parisson.com",
-  version = '0.2',
+  version = '0.3',
   install_requires = [
         'setuptools',
         'pyliblo',
