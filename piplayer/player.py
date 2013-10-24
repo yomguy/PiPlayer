@@ -57,8 +57,8 @@ class PiPlayer(object):
         
         # OSC controller
         self.osc_controller = OSCController(self.osc_port)
-        self.osc_controller.add_method('/play', 'i', self.osc_play_stop)
-        self.osc_controller.add_method('/stop', 'i', self.osc_play_stop)
+        self.osc_controller.add_method('/play', 'i', self.osc_play_pause)
+        self.osc_controller.add_method('/stop', 'i', self.osc_stop)
         self.osc_controller.start()
  
         # GPIO controller
@@ -174,11 +174,21 @@ class PiPlayer(object):
             self.pipeline.set_state(gst.STATE_NULL)
             self.playing = False
 
-    def osc_play_stop(self, path, value):
+    def pause(self):
+        if self.playing:
+            self.pipeline.set_state(gst.STATE_PAUSED)
+            self.playing = False
+            
+    def osc_play_pause(self, path, value):
         value = value[0]
         if value and not self.playing:
             self.play()
         else:
+            self.pause()
+
+    def osc_stop(self, path, value):
+        value = value[0]
+        if value and self.playing:
             self.stop()
             
     def gpio_play(self, channel):
