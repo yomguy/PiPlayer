@@ -46,7 +46,7 @@ class PiPlayer(object):
     looping = False
     auto_next = False
     alsa_device = 'hw:0'
-    parasite_filter_time = '0.02'
+    parasite_filter_time = 0.02
     
     def __init__(self, play_dir):
         # Playlist
