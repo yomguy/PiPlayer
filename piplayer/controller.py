@@ -52,7 +52,8 @@ class GPIOController(Thread):
         self.event_method = self.server.RISING
         
     def add_channel_callback(self, channel, callback, bouncetime):
-        self.server.setup(channel, self.server.IN, pull_up_down=self.setup_method)
+        #self.server.setup(channel, self.server.IN, pull_up_down=self.setup_method)
+        self.server.setup(channel, self.server.IN)
         self.server.add_event_detect(channel, self.event_method, callback=callback, bouncetime=bouncetime)
         
     def run(self):

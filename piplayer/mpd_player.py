@@ -45,23 +45,26 @@ class PiMPDPlayer(Thread):
     playing = True
     looping = False
     auto_next = False
+    up_voluming = False
+    down_voluming = False
     alsa_device = 'hw:0'
     gpio_parasite_filter_time = 0.02
-    gpio_channel_mpd_volume_up = 25
+    gpio_channel_volume_up = 7
     mpd_host = 'localhost'
     mpd_port = 6600
     max_volume = 100
-    min_volume = 10
-    timer_period = 10
+    min_volume = 1
+    volume = 0
+    timer_period = 30
     volume_incr_time = 0.1
 
-    def __init__(self, play_dir):
+    def __init__(self):
         Thread.__init__(self)
+        
         # Playlist
-        self.play_dir = play_dir
-        self.playlist = []
-        self.set_playlist()
-        self.reset_timer()
+        #self.play_dir = play_dir
+        #self.playlist = []
+        #self.set_playlist()
 
         # OSC controller
         self.osc_controller = OSCController(self.osc_port)
@@ -73,18 +76,20 @@ class PiMPDPlayer(Thread):
         # MPD client
         self.mpd = MPDClient()
         self.mpd.connect(self.mpd_host, self.mpd_port)
-        
+        self.reset_timer()
+        self.mpd.setvol(self.min_volume)
+
         # GPIO controller
         self.gpio_controller = GPIOController()
-        #self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play, 3000)
-        #self.gpio_controller.add_channel_callback(self.gpio_channel_stop, self.gpio_stop, 1000)
-        #self.gpio_controller.add_channel_callback(self.gpio_channel_mpd_volume_up, self.mpd_volume_up, 3000)
+        self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play, 3000)
+        self.gpio_controller.add_channel_callback(self.gpio_channel_stop, self.gpio_stop, 1000)
+        self.gpio_controller.add_channel_callback(self.gpio_channel_volume_up, self.gpio_volume_up, 1000)
         self.gpio_controller.start()
         
         # Set 'uri' property on uridecodebin
         #self.srcdec.set_property('uri', 'file:///fake')
-        self.play_id = 0
-        self.uri =  self.playlist[self.play_id]
+        #self.play_id = 0
+        #self.uri =  self.playlist[self.play_id]
         
         if self.playing:
             self.play()
@@ -124,19 +129,26 @@ class PiMPDPlayer(Thread):
             self.playing = False
 
     def volume_up(self):
-        for vol in range(self.min_volume, self.max_volume+1):
-            self.mpd.setvol(vol)
-            print 'volume', vol
-            time.sleep(self.volume_incr_time)
+        if not self.volume == self.max_volume and not self.up_voluming:
+            for vol in range(self.volume, self.max_volume+1):
+                self.up_voluming = True
+                self.mpd.setvol(vol)
+                self.volume = vol
+                print 'volume', vol
+                time.sleep(self.volume_incr_time)
         self.reset_timer()
-        self.playing = True
+        self.up_voluming = False 
 
     def volume_down(self):
-        for vol in range(self.max_volume, self.min_volume-1, -1):
-            self.mpd.setvol(vol)
-            print 'volume', vol
-            time.sleep(self.volume_incr_time)
-        self.playing = False
+        if not self.volume == self.min_volume and not self.down_voluming:
+            for vol in range(self.volume, self.min_volume-1, -1):
+                if not self.up_voluming:
+                    self.down_voluming = True
+                    self.mpd.setvol(vol)
+                    self.volume = vol
+                    print 'volume', vol
+                    time.sleep(self.volume_incr_time)
+        self.down_voluming = False
 
     def osc_play_pause(self, path, value):
         value = value[0]
@@ -164,12 +176,10 @@ class PiMPDPlayer(Thread):
             self.stop()
 
     def gpio_volume_up(self, channel):
-        if self.gpio_parasite_filter():
-            self.volume_up()
+        self.volume_up()
     
     def gpio_volume_down(self, channel):
-        if self.gpio_parasite_filter():
-            self.volume_down()
+        self.volume_down()
     
     def reset_timer(self):
         self.timer = datetime.datetime.now()
@@ -181,7 +191,7 @@ class PiMPDPlayer(Thread):
 
     def run(self):
         while True:
-            if self.is_timer_over() and self.playing:
+            if self.is_timer_over() and not self.up_voluming:
                 self.volume_down()
             time.sleep(1)
             
