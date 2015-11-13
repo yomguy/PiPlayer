@@ -53,8 +53,7 @@ class PiMPDPlayer(Thread):
     mpd_host = 'localhost'
     mpd_port = 6600
     max_volume = 100
-    min_volume = 1
-    volume = 0
+    min_volume = 5
     timer_period = 30
     volume_incr_time = 0.1
 
@@ -67,17 +66,18 @@ class PiMPDPlayer(Thread):
         #self.set_playlist()
 
         # OSC controller
-        self.osc_controller = OSCController(self.osc_port)
-        self.osc_controller.add_method('/play', 'i', self.osc_play_pause)
-        self.osc_controller.add_method('/stop', 'i', self.osc_stop)
-        self.osc_controller.add_method('/volume_up', 'i', self.osc_volume_up)
-        self.osc_controller.start()
+        #self.osc_controller = OSCController(self.osc_port)
+        #self.osc_controller.add_method('/play', 'i', self.osc_play_pause)
+        #self.osc_controller.add_method('/stop', 'i', self.osc_stop)
+        #self.osc_controller.add_method('/volume_up', 'i', self.osc_volume_up)
+        #self.osc_controller.start()
         
         # MPD client
         self.mpd = MPDClient()
         self.mpd.connect(self.mpd_host, self.mpd_port)
         self.reset_timer()
         self.mpd.setvol(self.min_volume)
+        self.volume = self.min_volume
 
         # GPIO controller
         self.gpio_controller = GPIOController()
@@ -134,7 +134,8 @@ class PiMPDPlayer(Thread):
                 self.up_voluming = True
                 self.mpd.setvol(vol)
                 self.volume = vol
-                print 'volume', vol
+                if DEBUG:
+                    print 'volume', vol
                 time.sleep(self.volume_incr_time)
         self.reset_timer()
         self.up_voluming = False 
@@ -146,7 +147,8 @@ class PiMPDPlayer(Thread):
                     self.down_voluming = True
                     self.mpd.setvol(vol)
                     self.volume = vol
-                    print 'volume', vol
+                    if DEBUG:
+                        print 'volume', vol
                     time.sleep(self.volume_incr_time)
         self.down_voluming = False
 
@@ -186,7 +188,8 @@ class PiMPDPlayer(Thread):
 
     def is_timer_over(self):
         diff = datetime.datetime.now() - self.timer
-        print diff
+        if DEBUG:
+            print diff
         return diff.total_seconds() >= float(self.timer_period)
 
     def run(self):
