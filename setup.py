@@ -24,6 +24,7 @@ setup(
         'setuptools',
         'pyliblo',
         'RPi.GPIO',
+        'python-mpd2',
         ],
   platforms=['OS Independent'],
   license='Gnu Public License V2',

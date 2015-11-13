@@ -48,11 +48,12 @@ class GPIOController(Thread):
         import RPi.GPIO as GPIO
         self.server = GPIO
         self.server.setmode(self.server.BCM)
-        self.method = self.server.RISING
+        self.setup_method = self.server.PUD_UP
+        self.event_method = self.server.RISING
         
     def add_channel_callback(self, channel, callback, bouncetime):
-        self.server.setup(channel, self.server.IN, pull_up_down=self.method)
-        self.server.add_event_detect(channel, self.method, callback=callback, bouncetime=bouncetime)
+        self.server.setup(channel, self.server.IN, pull_up_down=self.setup_method)
+        self.server.add_event_detect(channel, self.event_method, callback=callback, bouncetime=bouncetime)
         
     def run(self):
         pass
