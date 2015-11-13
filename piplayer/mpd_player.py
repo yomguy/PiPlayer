@@ -53,6 +53,7 @@ class PiMPDPlayer(Thread):
     max_volume = 100
     min_volume = 10
     timer_period = 10
+    volume_incr_time = 0.1
 
     def __init__(self, play_dir):
         Thread.__init__(self)
@@ -123,15 +124,19 @@ class PiMPDPlayer(Thread):
             self.playing = False
 
     def volume_up(self):
-        self.mpd.setvol(self.max_volume)
+        for vol in range(self.min_volume, self.max_volume+1):
+            self.mpd.setvol(vol)
+            print 'volume', vol
+            time.sleep(self.volume_incr_time)
         self.reset_timer()
         self.playing = True
-        print 'volume', self.max_volume
 
     def volume_down(self):
-        self.mpd.setvol(self.min_volume)
+        for vol in range(self.max_volume, self.min_volume-1, -1):
+            self.mpd.setvol(vol)
+            print 'volume', vol
+            time.sleep(self.volume_incr_time)
         self.playing = False
-        print 'volume', self.min_volume
 
     def osc_play_pause(self, path, value):
         value = value[0]
