@@ -24,7 +24,7 @@
 # Doc : https://code.google.com/p/raspberry-gpio-python/wiki/Inputs
 
 
-DEBUG = False
+DEBUG = True
 
 from threading import Thread
 
@@ -53,7 +53,7 @@ class PiMPDPlayer(Thread):
     mpd_host = 'localhost'
     mpd_port = 6600
     max_volume = 100
-    min_volume = 5
+    min_volume = 10
     timer_period = 30
     volume_incr_time = 0.1
 
@@ -83,7 +83,7 @@ class PiMPDPlayer(Thread):
         self.gpio_controller = GPIOController()
         self.gpio_controller.add_channel_callback(self.gpio_channel_play, self.gpio_play, 3000)
         self.gpio_controller.add_channel_callback(self.gpio_channel_stop, self.gpio_stop, 1000)
-        self.gpio_controller.add_channel_callback(self.gpio_channel_volume_up, self.gpio_volume_up, 1000)
+        self.gpio_controller.add_channel_callback(self.gpio_channel_volume_up, self.gpio_volume_up, 3000)
         self.gpio_controller.start()
         
         # Set 'uri' property on uridecodebin
@@ -189,7 +189,7 @@ class PiMPDPlayer(Thread):
     def is_timer_over(self):
         diff = datetime.datetime.now() - self.timer
         if DEBUG:
-            print diff
+            print diff, self.volume
         return diff.total_seconds() >= float(self.timer_period)
 
     def run(self):
