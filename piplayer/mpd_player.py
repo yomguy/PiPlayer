@@ -54,8 +54,8 @@ class PiMPDPlayer(Thread):
     mpd_port = 6600
     max_volume = 100
     min_volume = 10
-    timer_period = 30
-    volume_incr_time = 0.1
+    timer_period = 10
+    volume_incr_time = 0.01
 
     def __init__(self):
         Thread.__init__(self)
@@ -128,11 +128,18 @@ class PiMPDPlayer(Thread):
             self.mpd.pause()
             self.playing = False
 
+    def set_volume(self, vol):
+        try:
+            self.mpd.setvol(vol)
+        except:
+            self.mpd.connect(self.mpd_host, self.mpd_port)
+            self.mpd.setvol(vol)
+
     def volume_up(self):
         if not self.volume == self.max_volume and not self.up_voluming:
             for vol in range(self.volume, self.max_volume+1):
                 self.up_voluming = True
-                self.mpd.setvol(vol)
+                self.set_volume(vol)
                 self.volume = vol
                 if DEBUG:
                     print 'volume', vol
@@ -145,7 +152,7 @@ class PiMPDPlayer(Thread):
             for vol in range(self.volume, self.min_volume-1, -1):
                 if not self.up_voluming:
                     self.down_voluming = True
-                    self.mpd.setvol(vol)
+                    self.set_volume(vol)
                     self.volume = vol
                     if DEBUG:
                         print 'volume', vol
